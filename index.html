@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Game</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+
+    <body>
+        <canvas id="myCanvas" width="600" height="400"></canvas>
+        <button id="resetButton">Reset</button>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                // Get the canvas element
+                var canvas = document.getElementById('myCanvas');
+                var ctx = canvas.getContext('2d');
+            
+                // Define circle properties
+                var circleRadius = 30;
+                var circleSpacing = 20;
+                var circleColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00'];
+                var arrowLength = 50;
+                var spaceBetweenCircleAndArrow = 30;
+            
+            
+                // Define arrow animation variables
+                var targetCircleIndex = null;
+                var arrowX = canvas.width - circleSpacing - circleRadius - spaceBetweenCircleAndArrow - arrowLength;
+                var arrowY = null;
+                var arrowSpeed = 5;
+            
+                // Function to draw circles and arrows
+                function draw() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+                    // Draw circles
+                    for (var i = 0; i < 4; i++) {
+                        var xCircle = circleSpacing + circleRadius;
+                        var yCircle = circleSpacing + circleRadius + (circleRadius * 2 + circleSpacing) * i;
+                        ctx.beginPath();
+                        ctx.arc(xCircle, yCircle, circleRadius, 0, Math.PI * 2);
+                        ctx.fillStyle = circleColors[i];
+                        ctx.fill();
+                    }
+            
+                    // Draw arrows
+                    for (var i = 0; i < 4; i++) {
+                        var xArrow = canvas.width - circleSpacing - circleRadius - spaceBetweenCircleAndArrow - arrowLength;
+                        var yArrow = circleSpacing + circleRadius + (circleRadius * 2 + circleSpacing) * i;
+                        ctx.beginPath();
+                        ctx.moveTo(xArrow, yArrow);
+                        ctx.lineTo(xArrow + arrowLength, yArrow - arrowLength / 2);
+                        ctx.moveTo(xArrow, yArrow);
+                        ctx.lineTo(xArrow + arrowLength, yArrow + arrowLength / 2);
+                        ctx.stroke();
+                    }
+            
+                    // Draw moving arrow
+                    if (targetCircleIndex !== null) {
+                        ctx.beginPath();
+                        ctx.moveTo(arrowX, arrowY);
+                        ctx.lineTo(arrowX + arrowLength, arrowY);
+                        ctx.stroke();
+                    }
+                }
+            
+                // Function to animate arrow towards the target circle
+                function animateArrow() {
+                    if (targetCircleIndex !== null) {
+                        var yCircle = circleSpacing + circleRadius + (circleRadius * 2 + circleSpacing) * targetCircleIndex;
+                        if (arrowX > circleSpacing + circleRadius) {
+                            arrowX -= arrowSpeed;
+                        } else if (arrowY > yCircle) {
+                            arrowY -= arrowSpeed;
+                        } else {
+                            // Arrow has reached the target circle
+                            circleColors[targetCircleIndex] = '#808080'; // Change color of the circle to grey
+                            targetCircleIndex = null; // Reset target circle index
+                        }
+                    }
+                }
+            
+                // Event listener for canvas click
+                canvas.addEventListener('click', function (event) {
+                    var x = event.clientX - canvas.getBoundingClientRect().left;
+                    var y = event.clientY - canvas.getBoundingClientRect().top;
+            
+                    for (var i = 0; i < 4; i++) {
+                        var xCircle = circleSpacing + circleRadius;
+                        var yCircle = circleSpacing + circleRadius + (circleRadius * 2 + circleSpacing) * i;
+                        if (Math.pow(x - xCircle, 2) + Math.pow(y - yCircle, 2) <= Math.pow(circleRadius, 2)) {
+                            // Clicked inside a circle
+                            if (targetCircleIndex === null) {
+                                targetCircleIndex = i;
+                                arrowX = canvas.width - circleSpacing - circleRadius - spaceBetweenCircleAndArrow - arrowLength;
+                                arrowY = yCircle;
+                            }
+                            break;
+                        }
+                    }
+                });
+            
+                // Event listener for reset button
+                var resetButton = document.getElementById('resetButton');
+                resetButton.addEventListener('click', function () {
+                    circleColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00']; // Reset circle colors
+                    targetCircleIndex = null; // Reset target circle index
+                });
+            
+                // Animation loop
+                setInterval(function () {
+                    animateArrow();
+                    draw();
+                }, 1000 / 60); // 60 frames per second
+            });
+            </script>
+    </body>
+
+</html>
